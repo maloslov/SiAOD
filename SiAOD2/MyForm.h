@@ -284,6 +284,7 @@ private: System::Void btnGen_Click(System::Object^ sender, System::EventArgs^ e)
 		}
 	}
 }
+
 private: System::Void txtMass_KeyPress(System::Object^ sender, System::Windows::Forms::KeyPressEventArgs^ e) {
 	if (Char::IsDigit(e->KeyChar) || e->KeyChar == 8 || e->KeyChar == 32)
 		e->Handled = false;
