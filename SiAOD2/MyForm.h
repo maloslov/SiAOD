@@ -85,11 +85,11 @@ namespace Forma {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->groupBox2 = (gcnew System::Windows::Forms::GroupBox());
+			this->btnSort = (gcnew System::Windows::Forms::Button());
 			this->btnFind = (gcnew System::Windows::Forms::Button());
 			this->txtRes = (gcnew System::Windows::Forms::TextBox());
 			this->txtElem = (gcnew System::Windows::Forms::TextBox());
 			this->label2 = (gcnew System::Windows::Forms::Label());
-			this->btnSort = (gcnew System::Windows::Forms::Button());
 			this->groupBox1->SuspendLayout();
 			this->groupBox2->SuspendLayout();
 			this->SuspendLayout();
@@ -105,6 +105,8 @@ namespace Forma {
 			// 
 			// btnGen
 			// 
+			this->btnGen->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->btnGen->Location = System::Drawing::Point(137, 48);
 			this->btnGen->Name = L"btnGen";
 			this->btnGen->Size = System::Drawing::Size(115, 23);
@@ -115,6 +117,8 @@ namespace Forma {
 			// 
 			// txtMass
 			// 
+			this->txtMass->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->txtMass->Location = System::Drawing::Point(7, 19);
 			this->txtMass->Multiline = true;
 			this->txtMass->Name = L"txtMass";
@@ -133,6 +137,8 @@ namespace Forma {
 			// 
 			// groupBox1
 			// 
+			this->groupBox1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->groupBox1->Controls->Add(this->txtMax);
 			this->groupBox1->Controls->Add(this->txtMin);
 			this->groupBox1->Controls->Add(this->label4);
@@ -185,6 +191,9 @@ namespace Forma {
 			// 
 			// groupBox2
 			// 
+			this->groupBox2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->groupBox2->Controls->Add(this->btnSort);
 			this->groupBox2->Controls->Add(this->btnFind);
 			this->groupBox2->Controls->Add(this->txtRes);
@@ -198,8 +207,21 @@ namespace Forma {
 			this->groupBox2->TabStop = false;
 			this->groupBox2->Text = L"Result";
 			// 
+			// btnSort
+			// 
+			this->btnSort->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Right));
+			this->btnSort->Location = System::Drawing::Point(188, 105);
+			this->btnSort->Name = L"btnSort";
+			this->btnSort->Size = System::Drawing::Size(64, 23);
+			this->btnSort->TabIndex = 9;
+			this->btnSort->Text = L"Sort";
+			this->btnSort->UseVisualStyleBackColor = true;
+			this->btnSort->Click += gcnew System::EventHandler(this, &MyForm::btnSort_Click);
+			// 
 			// btnFind
 			// 
+			this->btnFind->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->btnFind->Location = System::Drawing::Point(103, 105);
 			this->btnFind->Name = L"btnFind";
 			this->btnFind->Size = System::Drawing::Size(79, 23);
@@ -210,6 +232,9 @@ namespace Forma {
 			// 
 			// txtRes
 			// 
+			this->txtRes->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->txtRes->Location = System::Drawing::Point(7, 134);
 			this->txtRes->Multiline = true;
 			this->txtRes->Name = L"txtRes";
@@ -233,16 +258,6 @@ namespace Forma {
 			this->label2->Size = System::Drawing::Size(48, 13);
 			this->label2->TabIndex = 6;
 			this->label2->Text = L"Element:";
-			// 
-			// btnSort
-			// 
-			this->btnSort->Location = System::Drawing::Point(188, 105);
-			this->btnSort->Name = L"btnSort";
-			this->btnSort->Size = System::Drawing::Size(64, 23);
-			this->btnSort->TabIndex = 9;
-			this->btnSort->Text = L"Sort";
-			this->btnSort->UseVisualStyleBackColor = true;
-			this->btnSort->Click += gcnew System::EventHandler(this, &MyForm::btnSort_Click);
 			// 
 			// MyForm
 			// 
@@ -276,12 +291,19 @@ private: System::Void btnGen_Click(System::Object^ sender, System::EventArgs^ e)
 			min = Convert::ToInt32(txtMin->Text),
 			max = Convert::ToInt32(txtMax->Text);
 		txtMass->ResetText();
-		//massive generation
+		array<int>^ arr = gcnew array<int>(number);
+		for (int i = 0; i < number; i++)
+		{
+			arr[i] = random->Next(min, max + 1);
+		}
+		Array::Sort(arr);
+
 		for (int i = 0; i < number; i++) {
-			txtMass->AppendText((random->Next(min,max+1)).ToString());
+			txtMass->AppendText(arr[i].ToString());
 			if(i+1 < number)
 				txtMass->AppendText(" ");
 		}
+		delete arr, random;
 	}
 }
 
@@ -300,17 +322,17 @@ private: System::Void btnFind_Click(System::Object^ sender, System::EventArgs^ e
 	for (int i = 0; i < n; i++) {
 		mas[i] = Convert::ToInt32(a[i]);
 	}
-
+	//interpolation search
 	auto start = std::chrono::steady_clock::now();
 	int res1 = InterpolSearch(mas, key)+1;
 	auto end = std::chrono::steady_clock::now();
 	auto time1_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
+	//standart search
 	start = std::chrono::steady_clock::now();
 	int res2 = Array::IndexOf(mas,key)+1;
 	end = std::chrono::steady_clock::now();
 	auto time2_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
+	//output
 	if (res1 == -1 && res2 == -1) {
 		txtRes->Text = "false";
 	}
