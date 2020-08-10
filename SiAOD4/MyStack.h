@@ -17,12 +17,11 @@ namespace MyStack {
 	public:
 		Stack() {}
 		Object^ pop() {
-			Object^ res = 0;
-			if ((top != nullptr)) 
-			{
-				res = top->obj;
-				top = top->next;
-			}
+			if (top == nullptr)
+				return 0;
+
+			Object^ res = top->obj;
+			top = top->next;
 			return res;
 		}
 		void push(Object^ obj) {

@@ -96,6 +96,7 @@ namespace Forma {
 			this->btnImport->TabIndex = 1;
 			this->btnImport->Text = L"Import from file";
 			this->btnImport->UseVisualStyleBackColor = true;
+			this->btnImport->Click += gcnew System::EventHandler(this, &MyForm::btnImport_Click);
 			// 
 			// txt1
 			// 
@@ -145,6 +146,7 @@ namespace Forma {
 			this->btnExport->TabIndex = 6;
 			this->btnExport->Text = L"Export to file";
 			this->btnExport->UseVisualStyleBackColor = true;
+			this->btnExport->Click += gcnew System::EventHandler(this, &MyForm::btnExport_Click);
 			// 
 			// saveFileDialog1
 			// 
@@ -193,15 +195,23 @@ private: System::Void txt1_KeyPress(System::Object^ sender, System::Windows::For
 	else e->Handled = true;
 }
 	private: System::Void btnSort_Click(System::Object^ sender, System::EventArgs^ e) {
-		if (txt1->Text->Length > 4) {
+		if (txt1->Text->Length > 0) {
 			txt2->ResetText();
 			array<String^>^ arr = txt1->Text->Split(' ');
+			if (arr->Length < 2) {
+				MessageBox::Show("Wrong input!", "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+				return;
+			}
 			MyStack::Stack^ stack = gcnew MyStack::Stack();
 			int k[] = {0,0};
 			for (int i = 0; i < arr->Length; i++)
 			{
 				stack->push(arr[i]);
 				k[0] = whichType(arr[i]);
+				if (k[0] == 0) {
+					MessageBox::Show("Wrong input!", "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					return;
+				}
 
 				if (Math::Abs(k[0] - k[1]) > 0) {
 					txt2->AppendText(stack->pop() + " ");
@@ -213,11 +223,19 @@ private: System::Void txt1_KeyPress(System::Object^ sender, System::Windows::For
 					}
 				}
 			}
+			if (!stack->isEmpty()) {
+				MessageBox::Show("Wrong input!", "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+			}
 		}
 	}
 		   
 private: int whichType(String^ str) {
-	switch (str[0]) {
+	Char c;
+	try { c = str[0]; }
+	catch(IndexOutOfRangeException^) {
+		return 0;
+	}
+	switch (c) {
 	case 'A': {
 		return 1;	
 	}
@@ -227,6 +245,28 @@ private: int whichType(String^ str) {
 	default: 
 		return 0;	
 	}	
+}
+private: System::Void btnExport_Click(System::Object^ sender, System::EventArgs^ e) {
+	if (txt2->Text->Length > 0) {
+		String^ savetext;
+		if (saveFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::Cancel)
+		{
+			return;
+		}
+
+		savetext = saveFileDialog1->FileName;
+		System::IO::File::WriteAllText(savetext, txt2->Text);
+	}
+}
+private: System::Void btnImport_Click(System::Object^ sender, System::EventArgs^ e) {
+	String^ opentext;
+	txt1->Text = "";
+	if (openFileDialog1->ShowDialog() == System::Windows::Forms::DialogResult::Cancel)
+	{
+		return;
+	}
+	opentext = openFileDialog1->FileName;
+	txt1->AppendText(System::IO::File::ReadAllText(opentext, System::Text::Encoding::Default));
 }
 };
 }
