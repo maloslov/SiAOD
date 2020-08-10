@@ -303,7 +303,6 @@ private: System::Void btnGen_Click(System::Object^ sender, System::EventArgs^ e)
 			if(i+1 < number)
 				txtMass->AppendText(" ");
 		}
-		delete arr, random;
 	}
 }
 
@@ -340,8 +339,6 @@ private: System::Void btnFind_Click(System::Object^ sender, System::EventArgs^ e
 		txtRes->AppendText("\r\n\tInterpolation search\r\ntime(ns): " + time1_ns.count().ToString() + "\r\nPosition: " + res1 +
 		"\r\n\tStandart search\r\ntime(ns): " + time2_ns.count().ToString() + "\r\nPosition: " + res2.ToString());
 	}
-
-	delete mas, a, start,end,res1,res2,time1_ns,time2_ns;
 }
 private: int InterpolSearch(array<int>^ mas, int key)
 	   {
