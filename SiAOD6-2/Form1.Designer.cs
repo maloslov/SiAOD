@@ -33,6 +33,8 @@
             this.btnReset = new System.Windows.Forms.Button();
             this.btnStart = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.btnSave = new System.Windows.Forms.Button();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -59,6 +61,7 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox1.Controls.Add(this.btnSave);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.btnStart);
             this.groupBox1.Controls.Add(this.btnReset);
@@ -108,6 +111,25 @@
     "rt node -> orange color;\r\n-finish node -> red color.\r\nClick RMB on the one node " +
     "\r\nthen on the other to connect.\r\n";
             // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(11, 250);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(191, 34);
+            this.btnSave.TabIndex = 5;
+            this.btnSave.Text = "Save graph";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // saveFileDialog1
+            // 
+            this.saveFileDialog1.CheckFileExists = true;
+            this.saveFileDialog1.DefaultExt = "png";
+            this.saveFileDialog1.FileName = "graph";
+            this.saveFileDialog1.Filter = "PNG files|*.png";
+            this.saveFileDialog1.Title = "Export picture";
+            this.saveFileDialog1.ValidateNames = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -132,6 +154,8 @@
         private System.Windows.Forms.Button btnReset;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnStart;
+        private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }
 }
 

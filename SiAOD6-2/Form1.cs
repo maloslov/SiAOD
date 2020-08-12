@@ -21,7 +21,7 @@ namespace SiAOD6_2
         private MyCircle activeCircle;
         private MyCircle bufCircle;
         private Color bufColor;
-        private Font font = new Font(FontFamily.GenericSansSerif, 12, FontStyle.Bold);
+        private Font font = new Font(FontFamily.GenericSansSerif, 14, FontStyle.Bold);
         private const int RADIUS = 16;
         private bool drawing = false;
         private bool dragging = false;
@@ -184,8 +184,8 @@ namespace SiAOD6_2
                     g.DrawLine(arrow, circle.Point.X, circle.Point.Y,
                         point2.Point.X, point2.Point.Y);
                     g.DrawString(ind.Item2.ToString(), font, Brushes.Magenta,
-                        Math.Abs(circle.Point.X - 3 * (circle.Point.X - point2.Point.X)/4), //debug this
-                        Math.Abs(circle.Point.Y - 3 * (circle.Point.Y - point2.Point.Y)/4)); //debug this
+                        Math.Abs(circle.Point.X - 5 * (circle.Point.X - point2.Point.X)/7), //debug this
+                        Math.Abs(circle.Point.Y - 5 * (circle.Point.Y - point2.Point.Y)/7)); //debug this
                 }
             }
 
@@ -198,7 +198,7 @@ namespace SiAOD6_2
                 g.FillEllipse(circle.MyBrush, (circle.Point.X - RADIUS), 
                     (circle.Point.Y - RADIUS), (RADIUS * 2), (RADIUS * 2));
                 g.DrawString(circle.Index.ToString(), font, textColor, 
-                    (circle.Point.X - RADIUS/2), (circle.Point.Y - RADIUS/2));
+                    (circle.Point.X - 4*RADIUS/5), (circle.Point.Y - 4*RADIUS/5));
             }
         }
 
@@ -231,9 +231,6 @@ namespace SiAOD6_2
             }
                 pictureBox1.Refresh();
         }
-
-        #endregion
-
         private void btnReset_Click(object sender, EventArgs e)
         {
             myCircles.Clear();
@@ -245,26 +242,21 @@ namespace SiAOD6_2
             pictureBox1.Refresh();
         }
 
-        private void txtCost_KeyPress(object sender, KeyPressEventArgs e)
+        private void btnSave_Click(object sender, EventArgs e)
         {
-            if(Char.IsDigit(e.KeyChar) || e.KeyChar == 8)
+            String savepic;
+            if (saveFileDialog1.ShowDialog() == DialogResult.Cancel)
             {
-                e.Handled = false;
+                return;
             }
-            else if (e.KeyChar == 13)
-            {
-                //this. (txtCost);
-            }
-            else
-            {
-                e.Handled = true;
-            }
+
+            savepic = saveFileDialog1.FileName;
+            Bitmap pic = new Bitmap(pictureBox1.Width,pictureBox1.Height);
+            pictureBox1.DrawToBitmap(pic, pictureBox1.ClientRectangle);
+            pic.Save(savepic,System.Drawing.Imaging.ImageFormat.Png);
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            form2.ShowDialog(this);
-            txtBox.AppendText(form2.Text);
-        }
+        #endregion
+
     }
 }
