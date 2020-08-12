@@ -72,7 +72,6 @@
             this.txtBox.TabIndex = 0;
             this.txtBox.Text = "";
             this.txtBox.WordWrap = false;
-            this.txtBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtBox_KeyPress);
             // 
             // Form1
             // 

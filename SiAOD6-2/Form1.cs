@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,13 +18,16 @@ namespace SiAOD6_2
     {
         private List<MyCircle> myCircles = new List<MyCircle>();
         private MyCircle activeCircle;
-        private const int RADIUS = 15;
+        private MyCircle bufCircle;
+        private Color bufColor;
+        private const int RADIUS = 16;
         private bool drawing = false;
         private bool dragging = false;
-        private bool choosingStartEnd = false;
+        private bool connecting = false;
         private int[] startEnd = { 0, 0 };
         private readonly SolidBrush textColor = new SolidBrush(Color.White);
-        private Pen pen = new Pen(new SolidBrush(Color.Black), 4);
+        private Pen pen = new Pen(Brushes.Black, 2); 
+        private Pen arrow = new Pen(new SolidBrush((Color.Black)), 5);
         private Point dragOffset;
         
         public Form1()
@@ -31,30 +35,36 @@ namespace SiAOD6_2
             InitializeComponent();
         }
 
-        #region Node Visualisation & Controls
+        #region Node GUI
         //Node class
         public class MyCircle
         {
             public Point Point { get; set; }
             public int Index { get; }
-            public SolidBrush myBrush { get; }
+            public SolidBrush MyBrush { get; }
+            //List< Tuple<index,cost> >
+            public List<Tuple<int,int>> Neighbours { get; }
             
 
             public MyCircle(Point point, int index, Color color)
             {
                 Point = point;
                 Index = index;
-                myBrush = new SolidBrush(color);
+                MyBrush = new SolidBrush(color);
+                Neighbours = new List<Tuple<int,int>>();
             }
 
             public void setColor(Color color)
             {
-                myBrush.Color = color;
+                MyBrush.Color = color;
+            }
+            public void addNeighbour(int index, int cost)
+            {
+                Neighbours.Add(Tuple.Create(index,cost));
             }
         }
         private MyCircle CheckIfCircleClicked(Point point)
         {
-            //brush.Color = (Color.Red);
             return myCircles.FirstOrDefault(
                     circle =>
                         Math.Abs(circle.Point.X - point.X) < RADIUS &&
@@ -65,7 +75,43 @@ namespace SiAOD6_2
         {
             if (e.Button == MouseButtons.Right)
             {
-                return;
+                if (connecting)
+                {
+                    activeCircle = CheckIfCircleClicked(e.Location);
+                    if(activeCircle == bufCircle)
+                    {
+                        activeCircle.setColor(bufColor);
+                    }
+                    else if(activeCircle != null)
+                    {
+                        if (bufCircle.Neighbours.Exists(c => c.Item1.Equals(activeCircle.Index)))
+                        {
+                            bufCircle.Neighbours.Remove((bufCircle.Neighbours.Find(c => 
+                                c.Item1.Equals(activeCircle.Index))));
+                        }
+                        else
+                        {
+                            bufCircle.addNeighbour(activeCircle.Index, 0);
+                        }
+                         
+                        bufCircle.setColor(bufColor);
+                    }
+                        
+                    connecting = false;
+                }
+                else
+                {
+                    activeCircle = CheckIfCircleClicked(e.Location);
+
+                    if (activeCircle != null)
+                    {
+                        //I dunno how to solve this else
+                        bufColor = activeCircle.MyBrush.Color;
+                        activeCircle.setColor(Color.LightGreen);
+                        bufCircle = activeCircle;
+                        connecting = true;
+                    }
+                }
             }
             else
             {
@@ -88,7 +134,7 @@ namespace SiAOD6_2
                     dragOffset = new Point(activeCircle.Point.X - e.Location.X, activeCircle.Point.Y - e.Location.Y);
                 }
             }
-
+            pictureBox1.Refresh();
         }
 
         private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
@@ -96,19 +142,12 @@ namespace SiAOD6_2
             if (dragging)
             {
                 activeCircle.Point = new Point(e.Location.X + dragOffset.X, e.Location.Y + dragOffset.Y);
-                pictureBox1.Invalidate();
             }
+            pictureBox1.Refresh();
         }
 
         private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-
-            if (e.Button != MouseButtons.Left)
-                return;
-
-            if (activeCircle == null)
-                return;
-
             if (dragging)
             {
                 activeCircle.Point = new Point(e.Location.X + dragOffset.X, e.Location.Y + dragOffset.Y);
@@ -119,7 +158,7 @@ namespace SiAOD6_2
             }
             dragging = false;
             drawing = false;
-            pictureBox1.Invalidate();
+            pictureBox1.Refresh();
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -127,36 +166,33 @@ namespace SiAOD6_2
 
             Graphics g = e.Graphics;
             g.Clear(Color.White);
+            //specifying arrow
+            arrow.CustomEndCap = new AdjustableArrowCap(5f,7f);
+            arrow.CustomStartCap = new AdjustableArrowCap(0.1f,0.1f);
 
-            foreach (var circle in myCircles.Where(c => c != activeCircle))
+            //drawing lines
+            foreach (var circle in myCircles)
+            {
+                foreach (var ind in circle.Neighbours)
+                {
+                    MyCircle point2 =
+                        myCircles.FirstOrDefault(c => c.Index.Equals(ind.Item1));
+                    g.DrawLine(arrow, circle.Point.X, circle.Point.Y,
+                        point2.Point.X, point2.Point.Y);
+                }
+            }
+
+
+            //drawing circles
+            foreach (var circle in myCircles) 
             {
                 g.DrawEllipse(pen, (circle.Point.X - RADIUS),
                     (circle.Point.Y - RADIUS), (RADIUS * 2), (RADIUS * 2));
-                g.FillEllipse(circle.myBrush, (circle.Point.X - RADIUS), 
+                g.FillEllipse(circle.MyBrush, (circle.Point.X - RADIUS), 
                     (circle.Point.Y - RADIUS), (RADIUS * 2), (RADIUS * 2));
                 g.DrawString(circle.Index.ToString(), Font, textColor, 
-                    circle.Point.X - RADIUS/2, circle.Point.Y - RADIUS/2);
-
+                    (circle.Point.X - RADIUS/2), (circle.Point.Y - RADIUS/2));
             }
-
-            if (activeCircle != null)
-            {
-                g.DrawEllipse(pen, (activeCircle.Point.X - RADIUS),
-                    (activeCircle.Point.Y - RADIUS), (RADIUS * 2), (RADIUS * 2));
-                g.FillEllipse(activeCircle.myBrush, (activeCircle.Point.X - RADIUS),
-                    (activeCircle.Point.Y - RADIUS), (RADIUS * 2), (RADIUS * 2));
-                g.DrawString(activeCircle.Index.ToString(), Font, textColor, 
-                    activeCircle.Point.X - RADIUS/2, activeCircle.Point.Y - RADIUS/2);
-            }
-        }
-
-        #endregion
-
-        private void txtBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (Char.IsDigit(e.KeyChar) || e.KeyChar == 8 || e.KeyChar == 32)
-                e.Handled = false;
-            else e.Handled = true;
         }
 
         private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -184,9 +220,12 @@ namespace SiAOD6_2
                 {
                     activeCircle.setColor(Color.Green);
                     startEnd[1] = 0;
-                }
-                pictureBox1.Invalidate();
+                }//\|/ it was here
             }
+                pictureBox1.Refresh();
         }
+
+        #endregion
+
     }
 }
