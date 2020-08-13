@@ -127,7 +127,6 @@ namespace SiAOD6_2
                     activeCircle = new MyCircle(e.Location, myCircles.Count + 1, Color.Green);
 
                     myCircles.Add(activeCircle);
-                    pictureBox1.Invalidate();
 
                 }
                 else
