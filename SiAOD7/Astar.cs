@@ -8,6 +8,7 @@ using static SiAOD7.Form1;
 
 namespace SiAOD7
 {
+    
     public class Waypoint
     {
         public Point Loc { get; }
@@ -84,7 +85,7 @@ namespace SiAOD7
         }
 
     }
-
+    
     public class AstarState
     {
         public Map2D Map { get; }
@@ -125,6 +126,7 @@ namespace SiAOD7
                     openCells[wp.Loc].PrevCost > wp.PrevCost)
                 {
                     openCells.Add(wp.Loc, wp);
+                    
                 }
             }
         }
@@ -142,12 +144,13 @@ namespace SiAOD7
             openCells.Remove(loc);
         }
     }
-
+    
     public static class AstarPathfind
     {
         public const float LIMIT = 1e6f;
 
-        public static Waypoint computePath(Map2D map)
+        //Waypoint
+        public static Dictionary<Point,Waypoint> computePath(Map2D map)
         {
             AstarState state = new AstarState(map);
             Point end = map.end;
@@ -172,7 +175,8 @@ namespace SiAOD7
 
                 state.closeWaypoint(best.Loc);
             }
-            return finalWaypoint;
+            return state.closedCells;
+                //finalWaypoint;
         }
 
         private static void takeNextStep(Waypoint currWP, AstarState state)
@@ -218,6 +222,5 @@ namespace SiAOD7
         }
 
     }
-
 
 }

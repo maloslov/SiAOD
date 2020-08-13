@@ -16,7 +16,7 @@ namespace SiAOD7
         private int[] size = { 0, 0 };
         private int[] startEnd = { 0, 0 };
         private List<MyCell> allCells = new List<MyCell>();
-        private MyCell activeCell; //= new MyCell(0,25,25,75,125);
+        private MyCell activeCell;
         private Pen pen = new Pen(Brushes.LightGray, 5);
         private bool closing = false;
         private bool opening = false;
@@ -38,7 +38,6 @@ namespace SiAOD7
             public Point Size { get; set; }
             public int Index { get; set; }
             public Brush brush { get; set; }
-            public bool Path { get; set; }
             public Point Loc { get; set; }
 
             public MyCell(int ind, 
@@ -150,10 +149,6 @@ namespace SiAOD7
 
             foreach(var cell in allCells)
             {
-                if (cell.Path && !cell.brush.Equals(Brushes.Orange) &&
-                    !cell.brush.Equals(Brushes.OrangeRed))
-                    cell.setBrush(Brushes.SaddleBrown);
-
                 g.DrawRectangle(pen, cell.point.X, cell.point.Y, 
                     cell.Size.X - cell.point.X, cell.Size.Y - cell.point.Y);
                 g.FillRectangle(cell.brush, cell.point.X, cell.point.Y, 
@@ -174,7 +169,6 @@ namespace SiAOD7
                     closing = true;
                     opening = false;
                     activeCell.setBrush(Brushes.Blue);
-                    activeCell.Path = false;
                     map.changeCost(activeCell, int.MaxValue);
                 }
                 else if (e.Button == MouseButtons.Right)
@@ -182,7 +176,6 @@ namespace SiAOD7
                     closing = false;
                     opening = true;
                     activeCell.setBrush(Brushes.Green);
-                    activeCell.Path = false;
                     map.changeCost(activeCell, 0);
                 }
                 pictureBox1.Refresh();
@@ -200,14 +193,10 @@ namespace SiAOD7
                 {
                     activeCell.setBrush(Brushes.Blue);
                     map.changeCost(activeCell, int.MaxValue);
-                    activeCell.Path = false;
-                    map.changeCost(activeCell, int.MaxValue);
                 }
                 else if (opening)
                 {
                     activeCell.setBrush(Brushes.Green);
-                    map.changeCost(activeCell, 0);
-                    activeCell.Path = false;
                     map.changeCost(activeCell, 0);
                 }
                 pictureBox1.Refresh();
@@ -290,24 +279,44 @@ namespace SiAOD7
             {
                 foreach (var c in allCells)
                 {
-                    c.Path = false;
-                    c.setBrush(Brushes.Green);
+                    if(c.brush == Brushes.Yellow || c.brush == Brushes.Cyan)
+                        c.setBrush(Brushes.Green);
                 }
-                pictureBox1.Refresh();
 
-                way = AstarPathfind.computePath(map);
+                Dictionary<Point, Waypoint> di = AstarPathfind.computePath(map);
 
-                while(way != null)
+                List<MyCell> others = allCells.FindAll(c => 
+                    c.brush != Brushes.Orange &&
+                    c.brush != Brushes.OrangeRed && 
+                    c.brush != Brushes.Blue);
+
+                //way = //AstarPathfind.computePath(map);
+                int i = 1;
+                foreach(var d in di)
                 {
-                    Point loc = way.Loc;
-                    activeCell = allCells.First(c => c.Loc == loc);
-                    activeCell.Path = true;
+                    way = d.Value;
 
-                    way = way.PrevWaypoint;
-                
+                    while (way != null)
+                    {
+                        Point loc = way.Loc;
+                        if(others != null)
+                            activeCell = others.FirstOrDefault(c => (c.Loc == loc));
+                        if (activeCell != null)
+                            if (i == di.Count)
+                                activeCell.setBrush(Brushes.Cyan);
+                            else
+                                activeCell.setBrush(Brushes.Yellow);
+                        
+
+                        way = way.PrevWaypoint;
+                        pictureBox1.Refresh();
+                    }
+                    i++;
                 }
-                pictureBox1.Refresh();
             }
         }
+
+
+
     }
 }
