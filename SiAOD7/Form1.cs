@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ namespace SiAOD7
 {
     public partial class Form1 : Form
     {
+        private Stopwatch time = new Stopwatch();
         private int[] size = { 0, 0 };
         private int[] startEnd = { 0, 0 };
         private List<MyCell> allCells = new List<MyCell>();
@@ -283,18 +285,24 @@ namespace SiAOD7
                         c.setBrush(Brushes.Green);
                 }
 
+                time.Start();
                 Dictionary<Point, Waypoint> di = AstarPathfind.computePath(map);
+                time.Stop();
+
+                txtLog.AppendText("\r\nTime: " + time.Elapsed.ToString() + "\r\n");
 
                 List<MyCell> others = allCells.FindAll(c => 
                     c.brush != Brushes.Orange &&
                     c.brush != Brushes.OrangeRed && 
                     c.brush != Brushes.Blue);
 
-                //way = //AstarPathfind.computePath(map);
                 int i = 1;
                 foreach(var d in di)
                 {
                     way = d.Value;
+
+                    if (checkBox1.Checked)
+                        way = di.ElementAt(di.Count - 1).Value;
 
                     while (way != null)
                     {
@@ -312,6 +320,9 @@ namespace SiAOD7
                         pictureBox1.Refresh();
                     }
                     i++;
+
+                    if (checkBox1.Checked)
+                        break;
                 }
             }
         }

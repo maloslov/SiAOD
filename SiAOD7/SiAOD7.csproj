@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Astar.cs" />
+    <Compile Include="DoubleLee.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
