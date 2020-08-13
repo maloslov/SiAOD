@@ -17,9 +17,14 @@ namespace SiAOD7
         private int[] startEnd = { 0, 0 };
         private List<MyCell> allCells = new List<MyCell>();
         private MyCell activeCell; //= new MyCell(0,25,25,75,125);
-        private Pen pen = new Pen(Brushes.LightGray, 7);
+        private Pen pen = new Pen(Brushes.LightGray, 5);
         private bool closing = false;
-        private bool opening = false; 
+        private bool opening = false;
+
+        #region astar var
+        private Map2D map;
+        private Waypoint way = new Waypoint(new Point(-1,-1), null);
+        #endregion
 
         public Form1()
         {
@@ -33,13 +38,19 @@ namespace SiAOD7
             public Point Size { get; set; }
             public int Index { get; set; }
             public Brush brush { get; set; }
+            public bool Path { get; set; }
+            public Point Loc { get; set; }
 
-            public MyCell(int ind, int x1, int y1, int x2, int y2)
+            public MyCell(int ind, 
+                int x1, int y1, 
+                int x2, int y2,
+                int a, int b)
             {
                 Index = ind;
                 point = new Point(x1, y1);
                 Size = new Point(x2, y2);
                 brush = Brushes.Green;
+                Loc = new Point(a, b);
             }
             public void setBrush(Brush b)
             {
@@ -74,12 +85,15 @@ namespace SiAOD7
                 startEnd[0] = 0;
                 startEnd[1] = 0;
 
+                map = new Map2D(w,h);
 
-                for (int y = 0; y < size[1]; y++)
+                for (int y = 0; y < h; y++)
                 {
-                    for (int x = 0; x < size[0]; x++)
+                    for (int x = 0; x < w; x++)
                     {
-                        activeCell = new MyCell(k, xy[0], xy[1], xy[0] + dx, xy[1] + dy);
+                        activeCell = new MyCell(k, 
+                            xy[0], xy[1], xy[0] + dx, 
+                            xy[1] + dy, x, y);
                         allCells.Add(activeCell);
                         k++;
                         xy[0] += dx;
@@ -90,9 +104,9 @@ namespace SiAOD7
             }
             else
             {
-                for (int y = 0; y < size[1]; y++)
+                for (int y = 0; y < h; y++)
                 {
-                    for (int x = 0; x < size[0]; x++)
+                    for (int x = 0; x < w; x++)
                     {
                         activeCell = allCells.First(cell => cell.Index == k);
                         activeCell.changeSize(xy[0], xy[1], xy[0] + dx, xy[1] + dy);
@@ -136,6 +150,10 @@ namespace SiAOD7
 
             foreach(var cell in allCells)
             {
+                if (cell.Path && !cell.brush.Equals(Brushes.Orange) &&
+                    !cell.brush.Equals(Brushes.OrangeRed))
+                    cell.setBrush(Brushes.SaddleBrown);
+
                 g.DrawRectangle(pen, cell.point.X, cell.point.Y, 
                     cell.Size.X - cell.point.X, cell.Size.Y - cell.point.Y);
                 g.FillRectangle(cell.brush, cell.point.X, cell.point.Y, 
@@ -156,12 +174,16 @@ namespace SiAOD7
                     closing = true;
                     opening = false;
                     activeCell.setBrush(Brushes.Blue);
+                    activeCell.Path = false;
+                    map.changeCost(activeCell, int.MaxValue);
                 }
                 else if (e.Button == MouseButtons.Right)
                 {
                     closing = false;
                     opening = true;
                     activeCell.setBrush(Brushes.Green);
+                    activeCell.Path = false;
+                    map.changeCost(activeCell, 0);
                 }
                 pictureBox1.Refresh();
             }
@@ -177,10 +199,16 @@ namespace SiAOD7
                 if (closing)
                 {
                     activeCell.setBrush(Brushes.Blue);
+                    map.changeCost(activeCell, int.MaxValue);
+                    activeCell.Path = false;
+                    map.changeCost(activeCell, int.MaxValue);
                 }
                 else if (opening)
                 {
                     activeCell.setBrush(Brushes.Green);
+                    map.changeCost(activeCell, 0);
+                    activeCell.Path = false;
+                    map.changeCost(activeCell, 0);
                 }
                 pictureBox1.Refresh();
             }
@@ -197,22 +225,26 @@ namespace SiAOD7
                 {
                     activeCell.setBrush(Brushes.Orange);
                     startEnd[0] = activeCell.Index;
+                    map.changeStart(activeCell, false);
                 }
                 else if (startEnd[0] == activeCell.Index)
                 {
                     activeCell.setBrush(Brushes.Green);
                     startEnd[0] = 0;
+                    map.changeStart(activeCell, true);
 
                 }
                 if (startEnd[1] == 0 && startEnd[0] != activeCell.Index)
                 {
                     activeCell.setBrush(Brushes.OrangeRed);
                     startEnd[1] = activeCell.Index;
+                    map.changeEnd(activeCell, false);
                 }
                 else if (startEnd[1] == activeCell.Index)
                 {
                     activeCell.setBrush(Brushes.Green);
                     startEnd[1] = 0;
+                    map.changeEnd(activeCell, true);
                 }
             }
             pictureBox1.Refresh();
@@ -232,6 +264,50 @@ namespace SiAOD7
             if (Char.IsDigit(e.KeyChar) || e.KeyChar == 8)
                 e.Handled = false;
             else e.Handled = true;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            String savepic;
+            if (saveFileDialog1.ShowDialog() == DialogResult.Cancel)
+            {
+                return;
+            }
+
+            savepic = saveFileDialog1.FileName;
+            Bitmap pic = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+            pictureBox1.DrawToBitmap(pic, pictureBox1.ClientRectangle);
+            pic.Save(savepic, System.Drawing.Imaging.ImageFormat.Png);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if(startEnd[0] == 0 || startEnd[1] == 0)
+            {
+                return;
+            }
+            else
+            {
+                foreach (var c in allCells)
+                {
+                    c.Path = false;
+                    c.setBrush(Brushes.Green);
+                }
+                pictureBox1.Refresh();
+
+                way = AstarPathfind.computePath(map);
+
+                while(way != null)
+                {
+                    Point loc = way.Loc;
+                    activeCell = allCells.First(c => c.Loc == loc);
+                    activeCell.Path = true;
+
+                    way = way.PrevWaypoint;
+                
+                }
+                pictureBox1.Refresh();
+            }
         }
     }
 }
