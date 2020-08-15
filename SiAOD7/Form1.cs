@@ -14,7 +14,7 @@ namespace SiAOD7
 {
     public partial class Form1 : Form
     {
-        private Stopwatch time = new Stopwatch();
+        //private Stopwatch time = new Stopwatch();
         private int[] size = { 0, 0 };
         private int[] startEnd = { 0, 0 };
         private List<MyCell> allCells = new List<MyCell>();
@@ -285,6 +285,7 @@ namespace SiAOD7
                         c.setBrush(Brushes.Green);
                 }
 
+                Stopwatch time = new Stopwatch();
                 time.Start();
                 Dictionary<Point, Waypoint> di = AstarPathfind.computePath(map);
                 time.Stop();
@@ -303,6 +304,8 @@ namespace SiAOD7
 
                     if (checkBox1.Checked)
                         way = di.ElementAt(di.Count - 1).Value;
+
+                    way.Reverse();
 
                     while (way != null)
                     {
@@ -327,7 +330,83 @@ namespace SiAOD7
             }
         }
 
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (startEnd[0] == 0 || startEnd[1] == 0)
+            {
+                return;
+            }
+            else
+            {
+                foreach (var c in allCells)
+                {
+                    if (c.brush == Brushes.Yellow || c.brush == Brushes.Cyan)
+                        c.setBrush(Brushes.Green);
+                }
+
+                DoubleBeamState dbs = new DoubleBeamState(map);
+                Stopwatch time = new Stopwatch();
+                time.Start();
+                //Dictionary<Point, Waypoint> 
+                Waypoint[] di = dbs.computePath();
+                time.Stop();
+
+                txtLog.AppendText("\r\nTime: " + time.Elapsed.ToString() + "\r\n");
+
+                List<MyCell> others = allCells.FindAll(c =>
+                    c.brush != Brushes.Orange &&
+                    c.brush != Brushes.OrangeRed &&
+                    c.brush != Brushes.Blue);
+
+                /*
+                int i = 1;
+                foreach (var d in di)
+                {
+                    way = d.Value;
+
+                    if (checkBox1.Checked)
+                        way = di.ElementAt(di.Count - 1).Value;
+
+                    way.Reverse();
+
+                    while (way != null)
+                    {
+                        Point loc = way.Loc;
+                        if (others != null)
+                            activeCell = others.FirstOrDefault(c => (c.Loc == loc));
+                        if (activeCell != null)
+                            if (i == di.Count)
+                                activeCell.setBrush(Brushes.Cyan);
+                            else
+                                activeCell.setBrush(Brushes.Yellow);
 
 
+                        way = way.PrevWaypoint;
+                        pictureBox1.Refresh();
+                    }
+                    i++;
+
+                } */
+
+                while (!(di[0] == null && di[1] == null &&
+                        di[2] == null && di[3] == null))
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (di[i] == null)
+                            continue;
+
+                        Point loc = di[i].Loc;
+                        activeCell = others.FirstOrDefault(c => (c.Loc == loc));
+                        if (activeCell != null)
+                            activeCell.setBrush(Brushes.Yellow);
+
+                        di[i] = di[i].PrevWaypoint;
+                        pictureBox1.Refresh();
+
+                    }
+                }
+            }
+        }
     }
 }

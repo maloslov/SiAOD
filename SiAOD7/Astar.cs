@@ -11,8 +11,8 @@ namespace SiAOD7
     
     public class Waypoint
     {
-        public Point Loc { get; }
-        public Waypoint PrevWaypoint { get; }
+        public Point Loc { get; set; }
+        public Waypoint PrevWaypoint { get; set; }
         public float PrevCost { get; set; }
         public float RemainingCost { get; set; }
 
@@ -25,7 +25,19 @@ namespace SiAOD7
         {
             return PrevCost + RemainingCost;
         }
+        public void Reverse()
+        {
+            Waypoint res = new Waypoint(Loc, null);
 
+            while(PrevWaypoint != null)
+            {
+                Loc = PrevWaypoint.Loc;
+                res = new Waypoint(Loc, res);
+                PrevWaypoint = PrevWaypoint.PrevWaypoint;
+            }
+            Loc = res.Loc;
+            PrevWaypoint = res.PrevWaypoint;
+        }
     }
 
     public class Map2D
@@ -159,7 +171,7 @@ namespace SiAOD7
             start.RemainingCost = estimateTravelCost(start.Loc, end);
             state.addOpen(start);
 
-            Waypoint finalWaypoint = null;
+            // Waypoint finalWaypoint = null;
             bool foundPath = false;
 
             while (!foundPath && state.openCells.Count > 0)
@@ -167,7 +179,7 @@ namespace SiAOD7
                 Waypoint best = state.getMinOpen();
                 if (best.Loc == (end)) 
                 {
-                    finalWaypoint = best;
+                   // finalWaypoint = best;
                     foundPath = true;
                 }
 
