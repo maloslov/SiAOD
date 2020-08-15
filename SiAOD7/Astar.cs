@@ -38,6 +38,27 @@ namespace SiAOD7
             Loc = res.Loc;
             PrevWaypoint = res.PrevWaypoint;
         }
+        public static Waypoint GetListIn(Waypoint from, Point p, Waypoint to)
+        {
+            bool flag = false;
+            Waypoint w = from,
+                res = to;
+            do
+            {
+                if((w.Loc == p || flag) && w != null)
+                {
+                    flag = true;
+                    res = new Waypoint(w.Loc, res);
+                }
+
+                w = w.PrevWaypoint;
+
+            } while (w != null);
+
+            if (!flag)
+                return null;
+            return res;
+        }
     }
 
     public class Map2D

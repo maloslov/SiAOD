@@ -347,7 +347,7 @@ namespace SiAOD7
                 DoubleBeamState dbs = new DoubleBeamState(map);
                 Stopwatch time = new Stopwatch();
                 time.Start();
-                //Dictionary<Point, Waypoint> 
+                //Dictionary<Point, Waypoint> di = dbs.computePath(); 
                 Waypoint[] di = dbs.computePath();
                 time.Stop();
 
@@ -386,26 +386,47 @@ namespace SiAOD7
                     }
                     i++;
 
-                } */
-
-                while (!(di[0] == null && di[1] == null &&
-                        di[2] == null && di[3] == null))
+                } 
+                */
+                if (!checkBox1.Checked)
                 {
-                    for (int i = 0; i < 4; i++)
+                    while (!(di[0] == null && di[1] == null &&
+                            di[2] == null && di[3] == null))
                     {
-                        if (di[i] == null)
-                            continue;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (di[i] == null)
+                                continue;
 
-                        Point loc = di[i].Loc;
-                        activeCell = others.FirstOrDefault(c => (c.Loc == loc));
-                        if (activeCell != null)
-                            activeCell.setBrush(Brushes.Yellow);
+                            Point loc = di[i].Loc;
+                            activeCell = others.FirstOrDefault(c => (c.Loc == loc));
+                            if (activeCell != null)
+                                activeCell.setBrush(Brushes.Yellow);
 
-                        di[i] = di[i].PrevWaypoint;
-                        pictureBox1.Refresh();
+                            di[i] = di[i].PrevWaypoint;
+                            pictureBox1.Refresh();
 
+                        }
                     }
                 }
+                if (di[4] == null)
+                {
+                    pictureBox1.Refresh();
+                    return;
+                }
+
+                while (di[4] != null)
+                {
+                    Point loc = di[4].Loc;
+                    activeCell = others.FirstOrDefault(c => (c.Loc == loc));
+                    if (activeCell != null)
+                        activeCell.setBrush(Brushes.Cyan);
+
+                    di[4] = di[4].PrevWaypoint;
+                    pictureBox1.Refresh();
+
+                }
+                
             }
         }
     }

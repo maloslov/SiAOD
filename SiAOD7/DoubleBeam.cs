@@ -17,7 +17,6 @@ namespace SiAOD7
         public Dictionary<Point,Waypoint> closedEnd { get; }
 
         public bool foundPath { get; set; }
-        public int foundOrDeadend { get; set; }
         public Waypoint[] ways { get; set; }
         public Point[] wayDirection { get; set; }
 
@@ -28,9 +27,8 @@ namespace SiAOD7
             closedCells = new Dictionary<Point, Waypoint>();
             closedStart = new Dictionary<Point, Waypoint>();
             closedEnd = new Dictionary<Point, Waypoint>();
-            foundOrDeadend = 0;
             wayDirection = new Point[4];
-            ways = new Waypoint[4];
+            ways = new Waypoint[5];
             // from start through x
             ways[0] = new Waypoint(map.start,null);
             // from start through y
@@ -39,6 +37,7 @@ namespace SiAOD7
             ways[2] = new Waypoint(map.end, null);
             // from end through y
             ways[3] = ways[2];
+            ways[4] = null;
 
             addOpen(ways[0]);
             addOpen(ways[1]);
@@ -118,13 +117,12 @@ namespace SiAOD7
             }
         }
 
-        public int isClosed(Point loc)
+        public bool isClosed(Point loc)
         {
-            if (closedStart.ContainsKey(loc))
-                return 1;
-            else if (closedEnd.ContainsKey(loc))
-                return 2;
-            return 0;
+            bool res = false;
+            if (closedCells.ContainsKey(loc))
+                res = true;
+            return res;
         }
 
         public void closeStart(Point loc)
@@ -147,27 +145,31 @@ namespace SiAOD7
             }
         }
 
-
-        public Waypoint[] /*Dictionary<Point,Waypoint> */ computePath()
+        public void setEndWay(Waypoint wp, Point loc)
         {
-            
-           // Waypoint finalWaypoint = null;
-            //bool foundPath = false;
+            ways[4] = Waypoint.GetListIn(ways[0], loc, wp);
+            if (ways[4] == null)
+                ways[4] = Waypoint.GetListIn(ways[1], loc, wp);
+            if (ways[4] == null)
+                ways[4] = Waypoint.GetListIn(ways[2], loc, wp);
+            if (ways[4] == null)
+                ways[4] = Waypoint.GetListIn(ways[3], loc, wp);
+            foundPath = true;
+        }
 
+
+        public Waypoint[] /*Dictionary<Point,Waypoint>*/ computePath()
+        {
             while(!foundPath && openCells.Count > 0)
             {
-                //Waypoint best = state.getMinOpen();
                 takeNextStep();
-
-
             }
             
             for(int i=0; i < 4; i++)
                 ways[i].Reverse();
             
-
             return ways;
-            //return state.closedCells;
+            //return closedCells;
         }
 
         private void takeNextStep()
@@ -176,32 +178,24 @@ namespace SiAOD7
 
             for(int i = 0; i < 4; i++)
             {
-                //Waypoint wp = state.ways[i];
                 loc = ways[i].Loc;
                 dir = wayDirection[i];
                 Point next = new Point((loc.X + dir.X), (loc.Y + dir.Y));
 
                 if (Map.contains(next.X,next.Y))
                 {
-                    int k = isClosed(next);
-                    switch(k)
-                    {
-                        case 1:
-                            {
-                             //   if (i > 1) state.setEndWay();
-                                break;
-                            }
-                        case 2:
-                            {
-                             //   if (i < 3) state.setEndWay();
-                                break;
-                            }
-                        case 0:
-                            {
-                                ways[i] = new Waypoint(next, ways[i]);
-                                addOpen(ways[i]);
-                                break;
-                            }
+                    if(Map.cells[next.X,next.Y] == 0) {
+
+                        if (isClosed(next))
+                        {
+                            setEndWay(ways[i], next);
+                            break;
+                        }
+                        else
+                        {
+                            ways[i] = new Waypoint(next, ways[i]);
+                            addOpen(ways[i]);
+                        }
                     }
 
                 }
