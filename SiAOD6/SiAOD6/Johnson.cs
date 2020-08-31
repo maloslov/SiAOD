@@ -11,36 +11,36 @@ namespace SiAOD6
     {
         public const int MAX_VALUE = 999;
 
-        private int SOURCE_NODE;
-        private int numberOfNodes;
-        private int[,] augmentedMatrix;
+        private readonly int SOURCE_NODE;
+        private readonly int numberOfNodes;
+        private readonly int[,] augmentedMatrix;
         private int[] potential;
         private BellmanFord bellmanFord;
         private Dijkstra dijkstra;
-        private int[,] allPairShortestPath;
+        private int[,] allShortest;
 
 
         private Johnson(int numberOfNodes)
         {
             this.numberOfNodes = numberOfNodes;
-            augmentedMatrix = new int[numberOfNodes + 2,numberOfNodes + 2];
-            SOURCE_NODE = numberOfNodes + 1;
-            potential = new int[numberOfNodes + 2];
-            bellmanFord = new BellmanFord(numberOfNodes + 1);
+            augmentedMatrix = new int[numberOfNodes + 1,numberOfNodes + 1];
+            SOURCE_NODE = numberOfNodes;
+            potential = new int[numberOfNodes + 1];
+            bellmanFord = new BellmanFord(numberOfNodes);
             dijkstra = new Dijkstra(numberOfNodes);
-            allPairShortestPath = new int[numberOfNodes + 1, numberOfNodes + 1];
+            allShortest = new int[numberOfNodes, numberOfNodes];
         }
 
         private void computeAugmentedGraph(int[,] adjacencyMatrix)
         {
-            for (int source = 1; source <= numberOfNodes; source++)
+            for (int source = 0; source < numberOfNodes; source++)
             {
-                for (int destination = 1; destination <= numberOfNodes; destination++)
+                for (int destination = 0; destination < numberOfNodes; destination++)
                 {
                     augmentedMatrix[source, destination] = adjacencyMatrix[source, destination];
                 }
             }
-            for (int destination = 1; destination <= numberOfNodes; destination++)
+            for (int destination = 0; destination < numberOfNodes; destination++)
             {
                 augmentedMatrix[SOURCE_NODE, destination] = 0;
             }
@@ -49,9 +49,9 @@ namespace SiAOD6
         private int[,] reweightGraph(int[,] adjacencyMatrix)
         {
             int[,] result = new int[numberOfNodes + 1, numberOfNodes + 1];
-            for (int source = 1; source <= numberOfNodes; source++)
+            for (int source = 0; source < numberOfNodes; source++)
             {
-                for (int destination = 1; destination <= numberOfNodes; destination++)
+                for (int destination = 0; destination < numberOfNodes; destination++)
                 {
                     result[source, destination] = adjacencyMatrix[source, destination]
                             + potential[source] - potential[destination];
@@ -60,61 +60,59 @@ namespace SiAOD6
             return result;
         }
 
-        public static int[,] johnsonsAlgorithms(int[,] adjacencyMatrix)
+        public static int[,] johnsonStart(int[,] adjacencyMatrix)
         {
-            Johnson j = new Johnson((int)Math.Sqrt(adjacencyMatrix.Length)-1);
+            Johnson j = new Johnson((int)Math.Sqrt(adjacencyMatrix.Length));
             j.computeAugmentedGraph(adjacencyMatrix);
 
-            j.bellmanFord.BellmanFordEvaluation(j.SOURCE_NODE, j.augmentedMatrix);
+            bool flag = j.bellmanFord.BellmanFordEvaluation(j.SOURCE_NODE, j.augmentedMatrix);
+            if (!flag)
+                return null;
             j.potential = j.bellmanFord.distances;
 
             int[,] reweightedGraph = j.reweightGraph(adjacencyMatrix);
 
-            for (int source = 1; source <= j.numberOfNodes; source++)
+            for (int source = 0; source < j.numberOfNodes; source++)
             {
                 //reweightedGraph in params
                 j.dijkstra.dijkstraShortestPath(source, reweightedGraph);
-                int[] result = j.dijkstra.distances;
-                for (int destination = 1; destination <= j.numberOfNodes; destination++)
+                int[] result = j.dijkstra.Distances;
+                for (int destination = 0; destination < j.numberOfNodes; destination++)
                 {
-                    j.allPairShortestPath[source,destination] = result[destination]
+                    j.allShortest[source,destination] = result[destination]
                             + j.potential[destination] - j.potential[source];
                 }
             }
 
-            return j.allPairShortestPath;
+            return j.allShortest;
         }
-
-
-
-
 
 
         class BellmanFord
         {
             public int[] distances { get; }
-            private int numberofvertices;
+            private int numberofverticles;
 
             public BellmanFord(int numberofvertices)
             {
-                this.numberofvertices = numberofvertices;
+                this.numberofverticles = numberofvertices;
                 distances = new int[numberofvertices + 1];
             }
 
-            public void BellmanFordEvaluation(int source, int[,] adjacencymatrix)
+            public bool BellmanFordEvaluation(int source, int[,] adjacencymatrix)
             {
-                for (int node = 1; node <= numberofvertices; node++)
+                for (int node = 0; node < numberofverticles; node++)
                 {
                     distances[node] = MAX_VALUE;
                 }
 
                 distances[source] = 0;
 
-                for (int node = 1; node <= numberofvertices - 1; node++)
+                for (int node = 0; node < numberofverticles-1; node++)
                 {
-                    for (int sourcenode = 1; sourcenode <= numberofvertices; sourcenode++)
+                    for (int sourcenode = 0; sourcenode < numberofverticles; sourcenode++)
                     {
-                        for (int destinationnode = 1; destinationnode <= numberofvertices; destinationnode++)
+                        for (int destinationnode = 1; destinationnode < numberofverticles; destinationnode++)
                         {
                             if (adjacencymatrix[sourcenode, destinationnode] != MAX_VALUE)
                             {
@@ -129,18 +127,23 @@ namespace SiAOD6
                     }
                 }
 
-                for (int sourcenode = 1; sourcenode <= numberofvertices; sourcenode++)
+                for (int sourcenode = 0; sourcenode < numberofverticles; sourcenode++)
                 {
-                    for (int destinationnode = 1; destinationnode <= numberofvertices; destinationnode++)
+                    for (int destinationnode = 0; destinationnode < numberofverticles; destinationnode++)
                     {
                         if (adjacencymatrix[sourcenode, destinationnode] != MAX_VALUE)
                         {
                             if (distances[destinationnode] > distances[sourcenode]
                                     + adjacencymatrix[sourcenode, destinationnode])
-                                MessageBox.Show("The Graph contains negative egde cycle!");
+                            {
+                                MessageBox.Show("The Graph contains negative egde cycle!", 
+                                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                return false;
+                            }
                         }
                     }
                 }
+                return true;
             }
         }
 
@@ -148,9 +151,9 @@ namespace SiAOD6
         {
             private bool[] settled;
             private bool[] unsettled;
-            public int[] distances { get; set; }
+            public int[] Distances { get; set; }
             private int[,] adjacencymatrix;
-            private int numberofvertices;
+            private readonly int numberofvertices;
 
 
             public Dijkstra(int numberofvertices)
@@ -162,18 +165,18 @@ namespace SiAOD6
             {
                 this.settled = new bool[numberofvertices + 1];
                 this.unsettled = new bool[numberofvertices + 1];
-                this.distances = new int[numberofvertices + 1];
+                this.Distances = new int[numberofvertices + 1];
                 this.adjacencymatrix = new int[numberofvertices + 1, numberofvertices + 1];
 
                 int evaluationnode;
-                for (int vertex = 1; vertex <= numberofvertices; vertex++)
+                for (int vertex = 0; vertex < numberofvertices; vertex++)
                 {
-                    distances[vertex] = MAX_VALUE;
+                    Distances[vertex] = MAX_VALUE;
                 }
 
-                for (int sourcevertex = 1; sourcevertex <= numberofvertices; sourcevertex++)
+                for (int sourcevertex = 0; sourcevertex < numberofvertices; sourcevertex++)
                 {
-                    for (int destinationvertex = 1; destinationvertex <= numberofvertices; destinationvertex++)
+                    for (int destinationvertex = 0; destinationvertex < numberofvertices; destinationvertex++)
                     {
                         this.adjacencymatrix[sourcevertex, destinationvertex]
                                 = adjacencymatrix[sourcevertex, destinationvertex];
@@ -181,7 +184,7 @@ namespace SiAOD6
                 }
 
                 unsettled[source] = true;
-                distances[source] = 0;
+                Distances[source] = 0;
                 while (getUnsettledCount(unsettled) != 0)
                 {
                     evaluationnode = getNodeWithMinimumDistanceFromUnsettled(unsettled);
@@ -194,7 +197,7 @@ namespace SiAOD6
             public int getUnsettledCount(bool[] unsettled)
             {
                 int count = 0;
-                for (int vertex = 1; vertex <= numberofvertices; vertex++)
+                for (int vertex = 0; vertex < numberofvertices; vertex++)
                 {
                     if (unsettled[vertex] == true)
                     {
@@ -208,12 +211,12 @@ namespace SiAOD6
             {
                 int min = MAX_VALUE;
                 int node = 0;
-                for (int vertex = 1; vertex <= numberofvertices; vertex++)
+                for (int vertex = 0; vertex < numberofvertices; vertex++)
                 {
-                    if (unsettled[vertex] == true && distances[vertex] < min)
+                    if (unsettled[vertex] == true && Distances[vertex] < min)
                     {
                         node = vertex;
-                        min = distances[vertex];
+                        min = Distances[vertex];
                     }
                 }
                 return node;
@@ -224,17 +227,17 @@ namespace SiAOD6
                 int edgeDistance = -1;
                 int newDistance = -1;
 
-                for (int destinationNode = 1; destinationNode <= numberofvertices; destinationNode++)
+                for (int destinationNode = 0; destinationNode < numberofvertices; destinationNode++)
                 {
                     if (settled[destinationNode] == false)
                     {
                         if (adjacencymatrix[evaluationNode, destinationNode] != MAX_VALUE)
                         {
                             edgeDistance = adjacencymatrix[evaluationNode, destinationNode];
-                            newDistance = distances[evaluationNode] + edgeDistance;
-                            if (newDistance < distances[destinationNode])
+                            newDistance = Distances[evaluationNode] + edgeDistance;
+                            if (newDistance < Distances[destinationNode])
                             {
-                                distances[destinationNode] = newDistance;
+                                Distances[destinationNode] = newDistance;
                             }
                             unsettled[destinationNode] = true;
                         }

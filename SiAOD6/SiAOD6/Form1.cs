@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -155,38 +156,46 @@ namespace SiAOD6
             String[] str = textBox1.Text.Split('\r');
             int n = str.Length;
             int[,] matrix = new int[n, n];
-            for(int i = 1; i < n; i++)
+            for(int i = 0; i < n; i++)
             {
                 String[] buf = str[i].Split(' ');
-                for(int j = 1; j < n; j++)
+                for(int j = 0; j < n; j++)
                 {
-                    matrix[i, j] = Convert.ToInt32(buf[j]);
+                    if (i == j)
+                    {
+                        matrix[i, j] = 0;
+                        continue;
+                    }
+                    try
+                    {
+                        matrix[i, j] = Convert.ToInt32(buf[j]);
+                    }
+                    catch (FormatException)
+                    {
+                        MessageBox.Show("Wrong input!","Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                        return;
+                    }
+                    if (matrix[i, j] == 0)
+                        matrix[i, j] = 999;
                 }
             }
 
-
-            for (int i = 1; i < n; i++)
+            textBox1.Text = "";
+            for (int i = 0; i < n; i++)
             {
-                textBox2.AppendText("\r\n");
-                for (int j = 1; j < n; j++)
+                for (int j = 0; j < n; j++)
                 {
-                    textBox2.AppendText("\t" + matrix[i,j].ToString());
+                    textBox1.AppendText(matrix[i, j].ToString() + " ");
                 }
+                if(i < n-1)
+                    textBox1.AppendText("\r\n");
             }
 
-            /*
-            int[,] matrix = {
-                {0, 1, 2, 3, 4, 5},
-                {1, 0,2,5,999,999},
-                {2, 999,0,3,2,8},
-                {3, 999,999,0,999,1},
-                {4, 5,999,3,0,6},
-                {5, 3,999,999,999,0} };
-
-            for(int i = 1; i < 6; i++)
+            //graph visualisation
+            for (int i = 0; i < n; i++)
             {
                 activeCircle = new MyCircle(new Point(100, 100), i, Color.Green);
-                for(int j = 1; j < 6; j++)
+                for(int j = 0; j < n; j++)
                 {
                     if (matrix[i, j] != 0 && matrix[i, j] != 999)
                         activeCircle.addNeighbour(j, matrix[i, j]);
@@ -195,22 +204,26 @@ namespace SiAOD6
             }
             pictureBox1.Refresh();
 
-            //Johnson johnson = new Johnson(5);
-            int[,] res = Johnson.johnsonsAlgorithms(matrix);
+            //search paths and count time
+            Stopwatch time = new Stopwatch();
+            time.Start();
+            int[,] res = Johnson.johnsonStart(matrix);
+            time.Stop();
 
-            for(int i = 1; i < 6; i++)
+            if (res == null)
+                return;
+
+           
+            textBox2.AppendText("\r\n");
+            for(int i = 0; i < n; i++)
             {
                 textBox2.AppendText("\r\n");
-                for(int j = 1; j < 6; j++)
+                for(int j = 0; j < n; j++)
                 {
-                    textBox2.AppendText(res[i, j].ToString() + "\t");
+                    textBox2.AppendText("\t" + res[i, j].ToString());
                 }
             }
-            */
-
-
-
-
+            textBox2.AppendText("\r\nTime: "+time.Elapsed.ToString()+"\r\n");
         }
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
