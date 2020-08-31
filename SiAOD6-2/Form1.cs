@@ -123,7 +123,6 @@ namespace SiAOD6_2
                 activeCircle = CheckIfCircleClicked(e.Location);
                 if (activeCircle == null)
                 {
-
                     activeCircle = new MyCircle(e.Location, myCircles.Count + 1, Color.Green);
 
                     myCircles.Add(activeCircle);
@@ -257,5 +256,50 @@ namespace SiAOD6_2
 
         #endregion
 
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            if(myCircles.Count > 1)
+            {
+                int[,] matrix = new int[myCircles.Count+1, myCircles.Count+1];
+                
+                //forming matrix
+                for(int i = 1; i <= myCircles.Count; i++)
+                {
+                    activeCircle = myCircles.FirstOrDefault(c => c.Index == i);
+                    //Tuple neibs = activeCircle.Neighbours.
+                    for(int j = 1; j <= myCircles.Count; j++)
+                    {
+                        if (i == j /*|| activeCircle == null*/)
+                        {
+                            matrix[i, j] = 0;
+                            continue;
+                        }
+
+                        Tuple<int,int> pair = activeCircle.Neighbours.FirstOrDefault(c => c.Item1.Equals(j));
+
+                        if(pair == null)
+                        {
+                            matrix[i, j] = 0;
+                        }
+                        else
+                        {
+                            matrix[i, j] = pair.Item2;
+                        }
+                        //
+
+                    }
+                }
+
+                for (int i = 0; i < matrix.Length; i++)
+                {
+                    for (int j = 0; j < matrix.Length; j++)
+                    {
+                        textBox1.AppendText(matrix[i, j] + "\t");
+                    }
+                }
+                textBox1.AppendText("\r\n");
+                
+            }
+        }
     }
 }
