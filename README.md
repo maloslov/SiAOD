@@ -1,11 +1,18 @@
 #Algorithms
 
  - Siaod2: interpolation search
-![picture](https://imgur.com/a/9K2T8h2)
+
+![picture](https://i.imgur.com/q27Erbu.png)
+
  - Siaod3: KMP search
-![picture](https://imgur.com/paDYA5s)
+
+![picture](https://i.imgur.com/paDYA5s.png)
+
  - Siaod4: stack sort
  - Siaod6: Johnson algorithm
-![picture](https://imgur.com/IeAt3jN)
+
+![picture](https://i.imgur.com/IeAt3jN.png)
+
  - Siaod7: Astar vs Double beam pathfind
-![picture](https://imgur.com/XBDs5BX)
+
+![picture](https://i.imgur.com/TbFzpua.png)
