@@ -1,4 +1,4 @@
-#Algorithms
+Algorithms
 
  - Siaod2: interpolation search
 
@@ -15,4 +15,4 @@
 
  - Siaod7: Astar vs Double beam pathfind
 
-![picture](https://i.imgur.com/TbFzpua.png)
+![picture](https://i.imgur.com/TbFzpua.gif)
