@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -258,48 +259,134 @@ namespace SiAOD6_2
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            if(myCircles.Count > 1)
+            if (!textBox2.Text.Equals(""))
             {
-                int[,] matrix = new int[myCircles.Count+1, myCircles.Count+1];
-                
-                //forming matrix
-                for(int i = 1; i <= myCircles.Count; i++)
+
+                String[] str = textBox2.Text.Split('\r');
+                int n = str.Length;
+                int[,] matrix = new int[n, n];
+                for (int i = 0; i < n; i++)
                 {
-                    activeCircle = myCircles.FirstOrDefault(c => c.Index == i);
-                    //Tuple neibs = activeCircle.Neighbours.
-                    for(int j = 1; j <= myCircles.Count; j++)
+                    String[] buf = str[i].Split(' ');
+                    for (int j = 0; j < n; j++)
                     {
-                        if (i == j /*|| activeCircle == null*/)
+                        if (i == j)
                         {
                             matrix[i, j] = 0;
                             continue;
                         }
-
-                        Tuple<int,int> pair = activeCircle.Neighbours.FirstOrDefault(c => c.Item1.Equals(j));
-
-                        if(pair == null)
+                        try
                         {
-                            matrix[i, j] = 0;
+                            matrix[i, j] = Convert.ToInt32(buf[j]);
                         }
-                        else
+                        catch (FormatException)
                         {
-                            matrix[i, j] = pair.Item2;
+                            MessageBox.Show("Wrong input!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
-                        //
-
+                        if (matrix[i, j] == 0)
+                            matrix[i, j] = int.MaxValue;
                     }
                 }
 
-                for (int i = 0; i < matrix.Length; i++)
+                textBox2.Text = "";
+                for (int i = 0; i < n; i++)
                 {
-                    for (int j = 0; j < matrix.Length; j++)
+                    for (int j = 0; j < n; j++)
                     {
-                        textBox1.AppendText(matrix[i, j] + "\t");
+                        textBox2.AppendText(matrix[i, j].ToString() + " ");
                     }
+                    if (i < n - 1)
+                        textBox2.AppendText("\r\n");
                 }
-                textBox1.AppendText("\r\n");
-                
+
+                myCircles.Clear();
+
+                //graph visualisation
+                for (int i = 0; i < n; i++)
+                {
+                    activeCircle = new MyCircle(new Point(100, 100), i, Color.Green);
+                    for (int j = 0; j < n; j++)
+                    {
+                        if (matrix[i, j] != 0 && matrix[i, j] != int.MaxValue)
+                            activeCircle.addNeighbour(j, matrix[i, j]);
+                    }
+                    myCircles.Add(activeCircle);
+                }
+                pictureBox1.Refresh();
+                compute(matrix);
             }
+            else
+            {
+
+                if (myCircles.Count > 1)
+                {
+                    int[,] matrix = new int[myCircles.Count, myCircles.Count];
+
+                    //forming matrix
+                    for (int i = 0; i < myCircles.Count; i++)
+                    {
+                        activeCircle = myCircles.FirstOrDefault(c => c.Index == i+1);
+                        //Tuple neibs = activeCircle.Neighbours.
+                        for (int j = 0; j < myCircles.Count; j++)
+                        {
+                            if (i == j /*|| activeCircle == null*/)
+                            {
+                                matrix[i, j] = 0;
+                                continue;
+                            }
+
+                            Tuple<int, int> pair = activeCircle.Neighbours.FirstOrDefault(c => c.Item1.Equals(j+1));
+
+                            if (pair == null)
+                            {
+                                matrix[i, j] = 0;
+                            }
+                            else
+                            {
+                                matrix[i, j] = pair.Item2;
+                            }
+                            //
+
+                        }
+                    }
+
+                    for (int i = 0; i < matrix.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < matrix.GetLength(1); j++)
+                        {
+                            textBox2.AppendText(matrix[i, j] + "\t");
+                        }
+                        textBox2.AppendText("\r\n");
+                    }
+                    compute(matrix);
+                }
+            }
+        }
+        private void compute(int[,] matrix) { 
+            
+            int n = matrix.GetLength(0);
+            //search paths and count time
+            Stopwatch time = new Stopwatch();
+            time.Start();
+            int[,] res = Johnson.johnsonStart(matrix);
+            time.Stop();
+
+            if (res == null)
+                return;
+
+
+            //textBox1.AppendText("\r\n");
+            for (int i = 0; i < n; i++)
+            {
+                //textBox1.AppendText("\r\n");
+                for (int j = 0; j < n; j++)
+                {
+                    textBox1.AppendText(" " + res[i, j].ToString());
+                }
+            }
+            textBox1.AppendText("\r\nTime: " + time.Elapsed.ToString() + "\r\n");
+            
         }
     }
 }

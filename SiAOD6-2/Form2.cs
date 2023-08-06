@@ -19,17 +19,16 @@ namespace SiAOD6_2
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (Char.IsDigit(e.KeyChar) || e.KeyChar == 8)
+            if (Char.IsDigit(e.KeyChar) || e.KeyChar.Equals('-'))
                 e.Handled = false;
             else e.Handled = true;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            int digit;
             if(textBox1.Text.Length > 0)
             {
-                digit = Convert.ToInt32(textBox1.Text);
+                
                 button1.Enabled = true;
             }
             else
@@ -40,6 +39,12 @@ namespace SiAOD6_2
 
         private void button1_Click(object sender, EventArgs e)
         {
+            try
+            {
+                int digit = Convert.ToInt32(textBox1.Text);
+            }
+            catch (Exception) { return; }
+
             this.Text = textBox1.Text;
             this.Close();
         }
