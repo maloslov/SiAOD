@@ -1,18 +1,16 @@
-Algorithms
+# Algorithms
 
- - Siaod2: interpolation search
+ 1. Siaod7: Astar vs Double beam pathfind
+<img src='https://github.com/maloslov/SiAOD/blob/master/SiAOD7/siaod7.gif' width=600>
 
-![picture](https://i.imgur.com/q27Erbu.png)
+ 2. Siaod6: Johnson algorithm
+<img src='https://i.imgur.com/IeAt3jN.png' width=600>
 
- - Siaod3: KMP search
+ 3. Siaod4: stack sort
+ 4. Siaod3: KMP search
+ 5. Siaod2: interpolation search
 
-![picture](https://i.imgur.com/paDYA5s.png)
-
- - Siaod4: stack sort
- - Siaod6: Johnson algorithm
-
-![picture](https://i.imgur.com/IeAt3jN.png)
-
- - Siaod7: Astar vs Double beam pathfind
-
-![picture](https://github.com/maloslov/SiAOD/blob/master/SiAOD7/siaod7.gif)
+<div>
+<img src='https://i.imgur.com/paDYA5s.png' width=300> 
+<img src="https://i.imgur.com/q27Erbu.png" width=316>
+</div>
